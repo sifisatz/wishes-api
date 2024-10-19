@@ -1,5 +1,10 @@
 {
-  "name": "expenses-server",
+  "name": "wishes-api",
+  "version": "1.0.0",
+  "description": "API for managing wishes",
+  "main": "src/index.ts",
+  "type": "module",
+  "author": "Your Name Joseph Atzamis iwsifa@gmail.com",
   "scripts": {
     "dev": "bun run --hot src/index.ts"
   },
