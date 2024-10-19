@@ -43,7 +43,6 @@ export const getAllUsers = async (): Promise<any> => {
 
   // Function to get all wishes associated with a specific user
 export const getWishesByUserId = async (userId: number): Promise<Response> => {
-    console.log('userDIR', userId);
     // Check if the user exists
     const userExists = users.find(user => user.id === userId);
     if (!userExists) {

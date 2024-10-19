@@ -57,6 +57,7 @@ const getAllUsersRoute = createRoute({
 // GET /users/{id}/wishes - Retrieve all wishes for a specific user
 const getUserWishesRoute = createRoute({
   method: "get",
+  summary: "Get user wishes based on their userid",
   path: "/{id}/wishes",
   request: {
     params: IdSchema,
@@ -74,7 +75,7 @@ const getUserWishesRoute = createRoute({
       description: "User not found or no wishes found",
     },
   },
-  tags: ["Wishes"],
+  tags: ["Users"],
 });
 
 // Logic for retrieving wishes by user ID
