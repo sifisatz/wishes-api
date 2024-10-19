@@ -7,7 +7,11 @@ export const WishSchema = z.object({
   price: z.number().positive(),
   priority: z.enum(["low", "medium", "high"]).default("medium"),
   dateAdded: z.string().optional(),
+  userId: z.number(), // Link to user ID
 }).openapi("Wish");
+
+
+export type Wish = z.infer<typeof WishSchema>; 
 
 // Schema for path parameters (like wish ID)
 export const IdSchema = z.object({

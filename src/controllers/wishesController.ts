@@ -2,23 +2,8 @@
 import { Context } from "hono";
 import { CreateWishSchema } from "../schemas/wish";
 import { z } from "zod";
+import { users, wishes } from "../db";
 // Mocked data for simplicity (In real use-case, this would be replaced by database calls)
-let wishes = [
-  {
-    id: 1,
-    description: "New Laptop",
-    price: 1500,
-    priority: "high",
-    dateAdded: "2024-10-01",
-  },
-  {
-    id: 2,
-    description: "Vacation",
-    price: 3000,
-    priority: "medium",
-    dateAdded: "2024-10-05",
-  },
-];
 
 // Controller function to get all wishes
 export const getAllWishes = (c: any) => {
@@ -31,13 +16,24 @@ export const getWishById = (c: any) => {
   if (!wish) return c.json({ message: "Wish not found" }, 404);
   return c.json(wish, 200);
 };
-export const deleteWish = (c: any) => {
-  const id = parseInt(c.req.param("id"));
-  const index = wishes.findIndex((w) => w.id === id);
-  if (index === -1) return c.json({ message: "Wish not found" }, 404);
+// Function to delete a wish by ID
+export const deleteWish = (c: any): Response => {
+  const id = parseInt(c.req.param("id")); // Get the wish ID from the request parameters
+  const index = wishes.findIndex((w) => w.id === id); // Find the index of the wish
 
-  wishes = wishes.filter((w) => w.id !== id);
-  return c.json({ message: "Wish deleted successfully" }, 200);
+  // Check if the wish exists
+  if (index === -1) {
+    return new Response(JSON.stringify({ message: "Wish not found" }), {
+      status: 404,
+    });
+  }
+
+  // Remove the wish from the in-memory database
+  wishes.splice(index, 1);
+  return new Response(
+    JSON.stringify({ message: "Wish deleted successfully" }),
+    { status: 200 }
+  );
 };
 
 // Function to update an existing wish by ID
@@ -81,17 +77,40 @@ export const updateWish = async (
   }
 };
 
+// Function to create a new wish
+export const createWish = async (request: Request): Promise<Response> => {
+  try {
+    const body = await request.json(); // Parse the JSON body
 
+    // Validate the request body against CreateWishSchema
+    const parsedBody = CreateWishSchema.parse(body); // Validate and parse using Zod
 
-export const createWish = async (
-    c: any
-  ): Promise<Response> => {
-   const body = await c.req.valid('body');
-  const newWish = {
-    id: wishes.length + 1,
-    ...body,
-    dateAdded: body.dateAdded || new Date().toISOString().split('T')[0],
-  };
-  wishes.push(newWish);
-  return c.json(newWish, 201);
-  };
+    // Check if the user exists
+    const userExists = users.find((user) => user.id === parsedBody.userId);
+    if (!userExists) {
+      return new Response(JSON.stringify({ error: "User not found" }), {
+        status: 404,
+      });
+    }
+
+    // Create a new wish with a unique ID
+    const newWish = {
+      id: wishes.length + 1,
+      ...parsedBody,
+    };
+
+    wishes.push(newWish); // Add to the in-memory database
+    return new Response(JSON.stringify(newWish), { status: 201 }); // Return the new wish
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ error: "Invalid input", details: error.errors }),
+        { status: 400 }
+      );
+    }
+    return new Response(
+      JSON.stringify({ error: "An unexpected error occurred" }),
+      { status: 500 }
+    );
+  }
+};

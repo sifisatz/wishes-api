@@ -1,13 +1,18 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { CreateUserSchema, UserSchema } from "../schemas/user";
-import { createUser, getAllUsers } from "../controllers/userController";
+import {
+  createUser,
+  getAllUsers,
+  getWishesByUserId,
+} from "../controllers/userController";
+import { IdSchema, WishSchema } from "../schemas/wish";
 
 export const userApp = new OpenAPIHono();
 
 // POST /users - Create a new user
 const createUserRoute = createRoute({
   method: "post",
-  path: "/users",
+  path: "/",
   request: {
     body: {
       content: {
@@ -34,22 +39,49 @@ const createUserRoute = createRoute({
 });
 // GET /users - Retrieve all users
 const getAllUsersRoute = createRoute({
-    method: 'get',
-    path: '/users',
-    responses: {
-      200: {
-        content: {
-          'application/json': {
-            schema: z.array(UserSchema),
-          },
+  method: "get",
+  path: "/",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.array(UserSchema),
         },
-        description: 'List of users',
       },
+      description: "List of users",
     },
-    tags: ['Users'],
-  });
+  },
+  tags: ["Users"],
+});
 
+// GET /users/{id}/wishes - Retrieve all wishes for a specific user
+const getUserWishesRoute = createRoute({
+  method: "get",
+  path: "/{id}/wishes",
+  request: {
+    params: IdSchema,
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.array(WishSchema), // Array of wishes
+        },
+      },
+      description: "List of wishes for the specified user",
+    },
+    404: {
+      description: "User not found or no wishes found",
+    },
+  },
+  tags: ["Wishes"],
+});
 
+// Logic for retrieving wishes by user ID
+userApp.openapi(getUserWishesRoute, async (c: any) => {
+  const userId = parseInt(c.req.param("id")); // Get user ID from request parameters
+  return await getWishesByUserId(userId); // Call the controller function
+});
 
 // Logic for the createUser route
 userApp.openapi(createUserRoute, async (c) => {
@@ -58,5 +90,5 @@ userApp.openapi(createUserRoute, async (c) => {
 
 // Logic for the getAllUsers route
 userApp.openapi(getAllUsersRoute, async () => {
-    return await getAllUsers();
-  });
+  return await getAllUsers();
+});
