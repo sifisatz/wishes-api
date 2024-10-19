@@ -30,6 +30,6 @@ app.doc("/doc", {
 });
 
 export default {
-  port: 3000,
+  port: 4000,
   fetch: app.fetch,
 };
