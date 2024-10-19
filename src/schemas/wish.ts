@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 // Schema for a Wish
 export const WishSchema = z.object({
@@ -7,7 +7,7 @@ export const WishSchema = z.object({
   price: z.number().positive(),
   priority: z.enum(["low", "medium", "high"]).default("medium"),
   dateAdded: z.string().optional(),
-});
+}).openapi("Wish");
 
 // Schema for path parameters (like wish ID)
 export const IdSchema = z.object({
