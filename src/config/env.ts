@@ -1,35 +1,34 @@
+/* eslint-disable no-console */
 import "dotenv/config";
 import { z } from "zod";
 
 console.log("🔐 Loading environment variables...");
 
 const serverSchema = z.object({
-	// Node
-	NODE_ENV: z.string(),
-	// Database
-	DATABASE_URL: z.string().min(1),
+  // Node
+  NODE_ENV: z.string().default("development"),
+  PORT: z.coerce.number().default(9999),
+  LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]),
 
-	// Supabase
-	SUPABASE_URL: z.string().min(1),
-	SUPABASE_SERVICE_ROLE: z.string().min(1),
+  // Database
+  DATABASE_URL: z.string().min(1),
+
+  // Supabase
+  SUPABASE_URL: z.string().min(1),
+  SUPABASE_SERVICE_ROLE: z.string().min(1),
 });
 
-const _serverEnv = serverSchema.safeParse(process.env);
+export type env = z.infer<typeof serverSchema>;
 
-if (!_serverEnv.success) {
-	console.error("❌ Invalid environment variables:\n");
-	_serverEnv.error.issues.forEach((issue) => {
-		console.error(issue);
-	});
-	throw new Error("Invalid environment variables");
+// eslint-disable-next-line ts/no-redeclare, node/no-process-env
+const { data: env, error } = serverSchema.safeParse(process.env);
+
+if (error) {
+  console.error("❌ Invalid env:");
+  console.error(JSON.stringify(error.flatten().fieldErrors, null, 2));
+  process.exit(1);
 }
 
-const { NODE_ENV, DATABASE_URL, SUPABASE_SERVICE_ROLE, SUPABASE_URL } = _serverEnv.data;
+export default env!;
 
-export const env = {
-	NODE_ENV,
-	DATABASE_URL,
-	SUPABASE_SERVICE_ROLE,
-	SUPABASE_URL,
-};
 console.log("✅ Environment variables loaded");

@@ -7,7 +7,6 @@ export const UserSchema = z.object({
   email: z.string().email("Invalid email address"),
 }).openapi("User");
 
-
 export type User = z.infer<typeof UserSchema>; // string
 // Schema for creating/updating a user (no `id`)
 export const CreateUserSchema = UserSchema.omit({ id: true });

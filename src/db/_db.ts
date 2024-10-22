@@ -1,7 +1,7 @@
-import { User } from "../schemas/user";
-import { Wish } from "../schemas/wish";
+import type { User } from "../schemas/user";
+import type { Wish } from "../schemas/wish";
 
-export let wishes: Wish[] = [
+export const wishes: Wish[] = [
   {
     id: 1,
     description: "New Laptop",

@@ -1,12 +1,24 @@
 {
   "compilerOptions": {
-    "strict": true,
+    "target": "ESNext",
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-
-
-    "allowJs": true,
-    "esModuleInterop": true,
-
+    "baseUrl": "./",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "~torch/*": ["src/~torch/*"],
+      "@*": ["./src/*"]
+    },
+    "typeRoots": ["./node_modules/@types"],
+    "types": [
+      "node"
+    ],
+    "strict": true,
+    "outDir": "./dist",
+    "skipLibCheck": true
+  },
+  "tsc-alias": {
+    "resolveFullPaths": true
   }
 }
