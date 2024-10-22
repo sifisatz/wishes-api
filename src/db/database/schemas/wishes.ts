@@ -1,6 +1,8 @@
 import { integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { v4 as uuidv4 } from "uuid";
+
+import { users } from "./users";
 // Define the SQLite table for wishes
 export const wishes = pgTable("wishes", {
   id: uuid("id").primaryKey().defaultRandom().$defaultFn(() => uuidv4()), // 👈 this here,
@@ -9,7 +11,7 @@ export const wishes = pgTable("wishes", {
   priority: text("priority").notNull(),
   dateAdded: timestamp("created_at").notNull().$defaultFn(() => new Date()),
   updatedAt: timestamp("updated_at").notNull().$defaultFn(() => new Date()),
-  userId: integer("user_id").notNull(),
+  userId: uuid("user_id").notNull().references(() => users.id),
 });
 
 // Create Zod schemas for inserting and selecting wishes
