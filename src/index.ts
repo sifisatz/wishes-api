@@ -1,5 +1,7 @@
 import env from "@config/env";
 import { serve } from "@hono/node-server";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { showRoutes } from "hono/dev";
 
 import app from "./app";

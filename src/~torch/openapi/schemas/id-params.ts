@@ -1,13 +1,13 @@
 import { z } from "@hono/zod-openapi";
 
 const IdParamsSchema = z.object({
-  id: z.coerce.number().openapi({
+  id: z.coerce.string().openapi({
     param: {
       name: "id",
       in: "path",
     },
     required: ["id"],
-    example: 42,
+    example: "42",
   }),
 });
 

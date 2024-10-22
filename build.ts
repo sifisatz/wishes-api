@@ -4,7 +4,7 @@ import { build } from "esbuild";
 
 const options = {
   bundle: true,
-  entryPoints: ["./src/server.ts"],
+  entryPoints: ["./src/index.ts"],
   banner: {
     js: "#!/usr/bin/env node",
   },

@@ -12,9 +12,6 @@ import { db } from "@/db/database/db";
 import type { CreateRoute, GetOneRoute, ListRoute, PatchRoute, RemoveRoute } from "./wishes.routes";
 
 // Controller function to get all wishes
-export function getAllWishes(c: any) {
-  return c.json(wishes, 200);
-}
 export const list: AppRouteHandler<ListRoute> = async (c) => {
   const res = await db.query.wishes.findMany();
   return c.json(res);
