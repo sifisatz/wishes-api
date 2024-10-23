@@ -1,7 +1,8 @@
-import { Context, Hono } from "hono";
-import { z } from "zod";
+import type { Context } from "hono";
+
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { CreateWishSchema, WishSchema, IdSchema } from "../schemas/wish";
+import { z } from "zod";
+
 import {
   createWish,
   deleteWish,
@@ -9,37 +10,37 @@ import {
   getWishById,
   updateWish,
 } from "../controllers/wishesController";
+import { CreateWishSchema, IdSchema, WishSchema } from "../schemas/wish";
 
 export const wishesApp = new OpenAPIHono();
 
-
 // POST /wishes - Create a new wish
 const createWishRoute = createRoute({
-    method: "post",
-  
-    path: "/",
-    body: {
+  method: "post",
+
+  path: "/",
+  body: {
+    content: {
+      "application/json": {
+        schema: CreateWishSchema, // Use the CreateWishSchema wrapped in content
+      },
+    },
+  },
+  responses: {
+    201: {
       content: {
         "application/json": {
-          schema: CreateWishSchema, // Use the CreateWishSchema wrapped in content
+          schema: WishSchema,
         },
       },
+      description: "Wish created successfully",
     },
-    responses: {
-      201: {
-        content: {
-          "application/json": {
-            schema: WishSchema,
-          },
-        },
-        description: "Wish created successfully",
-      },
-      400: {
-        description: "Invalid input",
-      },
+    400: {
+      description: "Invalid input",
     },
-    tags: ["Wishes"], // Add tag here for OpenAPI grouping
-  });
+  },
+  tags: ["Wishes"], // Add tag here for OpenAPI grouping
+});
 // GET /wishes - Get all wishes
 const getAllWishesRoute = createRoute({
   method: "get",
@@ -131,8 +132,6 @@ const getWishByIdRoute = createRoute({
   tags: ["Wishes"], // Add tag here for OpenAPI grouping
 });
 
-
-
 wishesApp.openapi(getAllWishesRoute, getAllWishes);
 wishesApp.openapi(getWishByIdRoute, getWishById);
 
@@ -141,7 +140,7 @@ wishesApp.openapi(createWishRoute, async (c: Context) => {
 });
 // Implement the logic for the updateWishRoute
 wishesApp.openapi(updateWishRoute, async (c: Context) => {
-  const id = parseInt(c.req.param("id"), 10);
+  const id = Number.parseInt(c.req.param("id"), 10);
   return await updateWish(id, c.req as unknown as Request); // Cast HonoRequest to Request
 });
 wishesApp.openapi(deleteWishRoute, deleteWish);

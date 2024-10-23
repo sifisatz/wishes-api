@@ -1,35 +1,17 @@
-import { logger } from "hono/logger";
-import { routes } from "./routes";
-import { errorHandler } from "./middlewares/errorHandler";
-import { OpenAPIHono } from "@hono/zod-openapi";
-import { swaggerUI } from "@hono/swagger-ui";
+import env from "@config/env";
+import { serve } from "@hono/node-server";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import { showRoutes } from "hono/dev";
 
-const app = new OpenAPIHono();
-app.use(logger());
+import app from "./app";
 
-// Error handling middleware
-app.use("*", errorHandler);
+const port = env.PORT;
+// eslint-disable-next-line no-console
+console.log(`Server is running on port http://localhost:${port}`);
 
-// Register all API routes
-app.route("/", routes);
-
-app.get("/", (c) => {
-  return c.text("Hello Hono!");
-});
-
-// Use the middleware to serve Swagger UI at /ui
-app.get("/ui", swaggerUI({ url: "/doc" }));
-
-// The OpenAPI documentation will be available at /doc
-app.doc("/doc", {
-  openapi: "3.0.0",
-  info: {
-    version: "1.0.0",
-    title: "My API",
-  },
-});
-
-export default {
-  port: 4000,
+serve({
   fetch: app.fetch,
-};
+  port,
+});
+showRoutes(app);

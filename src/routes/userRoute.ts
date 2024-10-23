@@ -1,10 +1,11 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { CreateUserSchema, UserSchema } from "../schemas/user";
+
 import {
   createUser,
   getAllUsers,
   getWishesByUserId,
 } from "../controllers/userController";
+import { CreateUserSchema, UserSchema } from "../schemas/user";
 import { IdSchema, WishSchema } from "../schemas/wish";
 
 export const userApp = new OpenAPIHono();
@@ -80,7 +81,7 @@ const getUserWishesRoute = createRoute({
 
 // Logic for retrieving wishes by user ID
 userApp.openapi(getUserWishesRoute, async (c: any) => {
-  const userId = parseInt(c.req.param("id")); // Get user ID from request parameters
+  const userId = Number.parseInt(c.req.param("id")); // Get user ID from request parameters
   return await getWishesByUserId(userId); // Call the controller function
 });
 

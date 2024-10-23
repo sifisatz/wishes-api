@@ -1,25 +1,26 @@
 // wishesController.ts
-import { Context } from "hono";
-import { CreateWishSchema } from "../schemas/wish";
 import { z } from "zod";
-import { users, wishes } from "../db";
+
+import { users, wishes } from "../db/_db";
+import { CreateWishSchema } from "../schemas/wish";
 // Mocked data for simplicity (In real use-case, this would be replaced by database calls)
 
 // Controller function to get all wishes
-export const getAllWishes = (c: any) => {
+export function getAllWishes(c: any) {
   return c.json(wishes, 200);
-};
+}
 
-export const getWishById = (c: any) => {
-  const id = parseInt(c.req.param("id"));
-  const wish = wishes.find((w) => w.id === id);
-  if (!wish) return c.json({ message: "Wish not found" }, 404);
+export function getWishById(c: any) {
+  const id = Number.parseInt(c.req.param("id"));
+  const wish = wishes.find(w => w.id === id);
+  if (!wish)
+    return c.json({ message: "Wish not found" }, 404);
   return c.json(wish, 200);
-};
+}
 // Function to delete a wish by ID
-export const deleteWish = (c: any): Response => {
-  const id = parseInt(c.req.param("id")); // Get the wish ID from the request parameters
-  const index = wishes.findIndex((w) => w.id === id); // Find the index of the wish
+export function deleteWish(c: any): Response {
+  const id = Number.parseInt(c.req.param("id")); // Get the wish ID from the request parameters
+  const index = wishes.findIndex(w => w.id === id); // Find the index of the wish
 
   // Check if the wish exists
   if (index === -1) {
@@ -32,16 +33,13 @@ export const deleteWish = (c: any): Response => {
   wishes.splice(index, 1);
   return new Response(
     JSON.stringify({ message: "Wish deleted successfully" }),
-    { status: 200 }
+    { status: 200 },
   );
-};
+}
 
 // Function to update an existing wish by ID
-export const updateWish = async (
-  id: number,
-  request: Request
-): Promise<Response> => {
-  const index = wishes.findIndex((w) => w.id === id);
+export async function updateWish(id: number, request: Request): Promise<Response> {
+  const index = wishes.findIndex(w => w.id === id);
 
   // Check if the wish exists
   if (index === -1) {
@@ -62,23 +60,24 @@ export const updateWish = async (
 
     // Return the updated wish
     return new Response(JSON.stringify(wishes[index]), { status: 200 });
-  } catch (error) {
+  }
+  catch (error) {
     // Handle errors
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({ error: "Invalid input", details: error.errors }),
-        { status: 400 }
+        { status: 400 },
       ); // Return validation errors
     }
     return new Response(
       JSON.stringify({ error: "An unexpected error occurred" }),
-      { status: 500 }
+      { status: 500 },
     ); // Handle unexpected errors
   }
-};
+}
 
 // Function to create a new wish
-export const createWish = async (request: Request): Promise<Response> => {
+export async function createWish(request: Request): Promise<Response> {
   try {
     const body = await request.json(); // Parse the JSON body
 
@@ -86,7 +85,7 @@ export const createWish = async (request: Request): Promise<Response> => {
     const parsedBody = CreateWishSchema.parse(body); // Validate and parse using Zod
 
     // Check if the user exists
-    const userExists = users.find((user) => user.id === parsedBody.userId);
+    const userExists = users.find(user => user.id === parsedBody.userId);
     if (!userExists) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
@@ -101,16 +100,17 @@ export const createWish = async (request: Request): Promise<Response> => {
 
     wishes.push(newWish); // Add to the in-memory database
     return new Response(JSON.stringify(newWish), { status: 201 }); // Return the new wish
-  } catch (error) {
+  }
+  catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({ error: "Invalid input", details: error.errors }),
-        { status: 400 }
+        { status: 400 },
       );
     }
     return new Response(
       JSON.stringify({ error: "An unexpected error occurred" }),
-      { status: 500 }
+      { status: 500 },
     );
   }
-};
+}
