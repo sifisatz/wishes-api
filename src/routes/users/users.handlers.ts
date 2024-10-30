@@ -2,15 +2,15 @@ import type { AppRouteHandler } from "@lib/types";
 
 import { users, wishes } from "@db/database/schema";
 import { ZOD_ERROR_CODES, ZOD_ERROR_MESSAGES } from "@lib/constants";
-import { Wish } from "@schemas/wish";
+import { lucia } from "@lucia";
 import * as HttpStatusCodes from "~torch/http-status-codes";
 import * as HttpStatusPhrases from "~torch/http-status-phrases";
 import { eq } from "drizzle-orm";
+import { generateId } from "lucia";
 
 import { db } from "@/db/database/db";
 
-import type { ListRoute as WishesListRoute } from "../wishes/wishes.routes";
-import type { CreateRoute, GetListOfUserWishes, GetOneRoute, ListRoute, PatchRoute, RemoveRoute } from "./users.routes";
+import type { GetListOfUserWishes, GetOneRoute, ListRoute, LoginRoute, PatchRoute, RemoveRoute, SignUpRoute } from "./users.routes";
 
 // Controller function to get all users
 export const list: AppRouteHandler<ListRoute> = async (c) => {
@@ -18,10 +18,69 @@ export const list: AppRouteHandler<ListRoute> = async (c) => {
   return c.json(res);
 };
 
-export const create: AppRouteHandler<CreateRoute> = async (c) => {
-  const toInsert = c.req.valid("json");
-  const [inserted] = await db.insert(users).values(toInsert).returning();
-  return c.json(inserted, HttpStatusCodes.OK);
+export const signup: AppRouteHandler<SignUpRoute> = async (c) => {
+  const { username, password } = c.req.valid("json");
+  const passwordHash = await Bun.password.hash(password);
+  const userId = generateId(15);
+
+  const [inserted] = await db.insert(users).values({
+    id: userId,
+    username,
+    password_hash: passwordHash,
+  }).returning();
+
+  const session = await lucia.createSession(userId, { username });
+  const sessionCookie = lucia.createSessionCookie(session.id).serialize();
+
+  c.header("Set-Cookie", sessionCookie, { append: true });
+  return c.json(inserted, HttpStatusCodes.CREATED);
+};
+
+export const login: AppRouteHandler<LoginRoute> = async (c) => {
+  const { username, password } = c.req.valid("json");
+
+  const [existingUser] = await db
+    .select()
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+
+  if (!existingUser) {
+    return c.json(
+      {
+        success: true,
+        message: "Incorrect username",
+      },
+      HttpStatusCodes.UNAUTHORIZED,
+    );
+  }
+
+  const validPassword = await Bun.password.verify(
+    password,
+    existingUser.password_hash,
+  );
+  if (!validPassword) {
+    return c.json(
+      {
+        success: true,
+        message: "Incorrect username",
+      },
+      HttpStatusCodes.UNAUTHORIZED,
+    );
+  }
+
+  const session = await lucia.createSession(existingUser.id, { username });
+  const sessionCookie = lucia.createSessionCookie(session.id).serialize();
+
+  c.header("Set-Cookie", sessionCookie, { append: true });
+
+  return c.json(
+    {
+      success: true,
+      message: "Logged in",
+    },
+    HttpStatusCodes.OK,
+  );
 };
 
 export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {

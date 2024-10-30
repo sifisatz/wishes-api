@@ -1,4 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { lucia } from "@lucia";
 import { pinoLogger } from "@middlewares/pinoLogger";
 import { notFound, onError, serveEmojiFavicon } from "~torch/middlewares";
 import { defaultHook } from "~torch/openapi";
@@ -21,7 +22,31 @@ export default function createApp() {
   const app = createRouter();
   app.use(serveEmojiFavicon("📝"));
   app.use(pinoLogger());
-  app.use("*", cors());
+
+  app.use("*", cors(), async (c, next) => {
+    const sessionId = lucia.readSessionCookie(c.req.header("Cookie") ?? "");
+    if (!sessionId) {
+      c.set("user", null);
+      c.set("session", null);
+      return next();
+    }
+
+    const { session, user } = await lucia.validateSession(sessionId);
+    if (session && session.fresh) {
+      c.header("Set-Cookie", lucia.createSessionCookie(session.id).serialize(), {
+        append: true,
+      });
+    }
+    if (!session) {
+      c.header("Set-Cookie", lucia.createBlankSessionCookie().serialize(), {
+        append: true,
+      });
+    }
+    c.set("session", session);
+    c.set("user", user);
+    return next();
+  });
+
   app.use("*", csrf());
   app.use("*", prettyJSON());
   app.use("*", secureHeaders());

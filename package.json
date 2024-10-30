@@ -19,9 +19,14 @@
     "lint": "eslint .",
     "lint:fix": "npm run lint --fix"
   },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
   "dependencies": {
     "@hono/node-server": "^1.13.2",
     "@hono/zod-openapi": "^0.16.4",
+    "@hono/zod-validator": "^0.4.1",
+    "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@scalar/hono-api-reference": "^0.5.156",
     "@supabase/supabase-js": "^2.45.6",
     "@types/uuid": "^10.0.0",
@@ -31,6 +36,7 @@
     "drizzle-zod": "^0.5.1",
     "hono": "^4.6.5",
     "hono-pino": "^0.3.0",
+    "lucia": "^3.2.2",
     "pino": "^9.4.0",
     "pino-pretty": "^11.2.2",
     "postgres": "^3.4.4",

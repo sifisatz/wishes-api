@@ -3,6 +3,8 @@
     "target": "ESNext",
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
+    "lib": ["ESNext"],
+    "moduleDetection": "force",
     "baseUrl": "./",
     "module": "ESNext",
     "moduleResolution": "Bundler",
@@ -10,12 +12,12 @@
       "~torch/*": ["src/~torch/*"],
       "@*": ["./src/*"]
     },
-    "typeRoots": ["./node_modules/@types"],
-    "types": [
-      "node"
-    ],
+
+    "allowImportingTsExtensions": true,
     "strict": true,
+    "noEmit": true,
     "outDir": "./dist",
+    "verbatimModuleSyntax": true,
     "skipLibCheck": true
   },
   "tsc-alias": {

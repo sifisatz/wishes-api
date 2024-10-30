@@ -11,7 +11,7 @@ export const wishes = pgTable("wishes", {
   priority: text("priority").notNull(),
   dateAdded: timestamp("created_at").notNull().$defaultFn(() => new Date()),
   updatedAt: timestamp("updated_at").notNull().$defaultFn(() => new Date()),
-  userId: uuid("user_id").notNull().references(() => users.id),
+  userId: text("user_id").notNull().references(() => users.id),
 });
 
 // Create Zod schemas for inserting and selecting wishes

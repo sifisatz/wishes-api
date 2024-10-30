@@ -1,9 +1,19 @@
-import { insertUsersSchema, patcUsersSchema, selectUsersSchema, selectWishesSchema } from "@db/database/schemas";
+import { selectUsersSchema, selectWishesSchema } from "@db/database/schemas";
 import { createRoute, z } from "@hono/zod-openapi";
 import { notFoundSchema } from "@lib/constants";
 import * as HttpStatusCodes from "~torch/http-status-codes";
 import { jsonContent, jsonContentRequired } from "~torch/openapi/helpers";
-import { createErrorSchema, IdParamsSchema } from "~torch/openapi/schemas";
+import { createErrorSchema, createMessageObjectSchema, IdParamsSchema } from "~torch/openapi/schemas";
+
+export const insertUsersSchema = z.object({
+  username: z
+    .string()
+    .min(3)
+    .max(31)
+    .regex(/^\w+$/),
+  password: z.string().min(3).max(255),
+});
+export const patcUsersSchema = insertUsersSchema.partial();
 
 const tags = ["Users"];
 
@@ -39,10 +49,8 @@ export const listOfUserWishes = createRoute({
   },
 });
 
-/* This code snippet is defining a route for creating a new User. Here's a breakdown of what each part
-is doing: */
-export const create = createRoute({
-  path: "/users",
+export const login = createRoute({
+  path: "/login",
   method: "post",
   request: {
     body: jsonContentRequired(
@@ -53,13 +61,33 @@ export const create = createRoute({
   tags,
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
+      createMessageObjectSchema("Logged in"),
+      "Logged in successfully",
+    ),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+      createMessageObjectSchema("Incorrect password"),
+      "Incorrect password",
+    ),
+  },
+});
+/* This code snippet is defining a route for creating a new User. Here's a breakdown of what each part
+is doing: */
+export const signup = createRoute({
+  path: "/signup",
+  method: "post",
+  request: {
+    body: jsonContentRequired(
+      insertUsersSchema,
+      "The user to create",
+    ),
+  },
+  tags,
+  responses: {
+    [HttpStatusCodes.CREATED]: jsonContent(
       selectUsersSchema,
       "The created user",
     ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(insertUsersSchema),
-      "The validation error(s)",
-    ),
+
   },
 });
 
@@ -137,7 +165,8 @@ export const remove = createRoute({
 });
 
 export type ListRoute = typeof list;
-export type CreateRoute = typeof create;
+export type SignUpRoute = typeof signup;
+export type LoginRoute = typeof login;
 export type GetOneRoute = typeof getOne;
 export type PatchRoute = typeof patch;
 export type RemoveRoute = typeof remove;

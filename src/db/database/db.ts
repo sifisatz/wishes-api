@@ -3,6 +3,7 @@
 /* eslint-disable import/no-mutable-exports */
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
+import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -39,3 +40,9 @@ else {
 }
 
 export { db };
+
+export const adapter = new DrizzlePostgreSQLAdapter(
+  db,
+  schema.sessionTable,
+  schema.users,
+);
