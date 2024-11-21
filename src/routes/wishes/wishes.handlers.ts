@@ -1,15 +1,20 @@
 import type { AppRouteHandler } from "@lib/types";
 
+import type {
+  CreateRoute,
+  GetOneRoute,
+  ListRoute,
+  PatchRoute,
+  RemoveRoute,
+} from "./wishes.routes";
+import { db } from "@/db/database/db";
 import { wishes } from "@db/database/schema";
 import { ZOD_ERROR_CODES, ZOD_ERROR_MESSAGES } from "@lib/constants";
-import { Wish } from "@schemas/wish";
 import * as HttpStatusCodes from "~torch/http-status-codes";
+
 import * as HttpStatusPhrases from "~torch/http-status-phrases";
+
 import { eq } from "drizzle-orm";
-
-import { db } from "@/db/database/db";
-
-import type { CreateRoute, GetOneRoute, ListRoute, PatchRoute, RemoveRoute } from "./wishes.routes";
 
 // Controller function to get all wishes
 export const list: AppRouteHandler<ListRoute> = async (c) => {
@@ -66,7 +71,8 @@ export const patch: AppRouteHandler<PatchRoute> = async (c) => {
     );
   }
 
-  const [task] = await db.update(wishes)
+  const [task] = await db
+    .update(wishes)
     .set(updates)
     .where(eq(wishes.id, id))
     .returning();

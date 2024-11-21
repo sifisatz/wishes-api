@@ -3,11 +3,11 @@
 /* eslint-disable import/no-mutable-exports */
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
+import env from "@/config/env";
 import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 
-import env from "@/config/env";
+import postgres from "postgres";
 
 import * as schema from "./schema";
 

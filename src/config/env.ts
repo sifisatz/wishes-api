@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
-import "dotenv/config";
+
 import { z } from "zod";
+import "dotenv/config";
 
 console.log("🔐 Loading environment variables...");
 

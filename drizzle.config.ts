@@ -6,7 +6,9 @@ export default {
   schema: "./src/db/database/schema.ts",
   out: "./drizzle",
   dialect: "postgresql",
+
   dbCredentials: {
+    ssl: { rejectUnauthorized: false },
     url: env.DATABASE_URL,
   },
 } satisfies Config;

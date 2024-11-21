@@ -37,3 +37,6 @@ http://localhost:3000
 To view the API documentation via Swagger UI, go to:
 
 http://localhost:3000/ui
+
+
+docker-compose up -d
